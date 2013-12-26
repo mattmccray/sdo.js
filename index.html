@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Sdo.js by darthapo</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Sdo.js</h1>
+          <h2>Simple Data Objects. Very simple, intended for use with React and small projects.</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/darthapo/sdo.js/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/darthapo/sdo.js/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/darthapo/sdo.js" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a name="simple-data-objects" class="anchor" href="#simple-data-objects"><span class="octicon octicon-link"></span></a>Simple Data Objects</h1>
+
+<p>This is experimental, really. Just simple data objects that have a single <code>onChange</code> callback support.</p>
+
+<div class="highlight highlight-coffeescript"><pre><span class="nv">user= </span><span class="k">new</span> <span class="nx">Model</span> <span class="nx">name</span><span class="o">:</span><span class="s">''</span><span class="p">,</span> <span class="nx">email</span><span class="o">:</span><span class="s">''</span>
+
+<span class="nx">user</span><span class="p">.</span><span class="nx">onChange</span> <span class="nf">(keys)-&gt;</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="s">"changed"</span><span class="p">,</span> <span class="nx">keys</span>
+  <span class="c1"># keys are actually the keys used in the #set() call, api may change</span>
+
+<span class="nx">user</span><span class="p">.</span><span class="nx">set</span> <span class="s">'name'</span><span class="p">,</span> <span class="s">'Matt'</span>
+<span class="c1"># or</span>
+<span class="nx">user</span><span class="p">.</span><span class="nx">set</span> <span class="nx">email</span><span class="o">:</span><span class="s">'my@email.org'</span>
+</pre></div>
+
+<p>Can extend the <code>Model</code> too, of course:</p>
+
+<div class="highlight highlight-coffeescript"><pre><span class="k">class</span> <span class="nx">User</span> <span class="k">extends</span> <span class="nx">Model</span>
+  <span class="nv">defaults: </span><span class="nf">-&gt;</span>
+    <span class="nv">name: </span><span class="s">''</span>
+    <span class="nv">email: </span><span class="s">''</span>
+
+<span class="nv">user= </span><span class="k">new</span> <span class="nx">User</span>
+</pre></div>
+
+<p>I use this with small React projects:</p>
+
+<div class="highlight highlight-coffeescript"><pre><span class="p">{</span><span class="nx">div</span><span class="p">}</span><span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">DOM</span>
+<span class="nv">_= </span><span class="kc">null</span>
+
+<span class="nv">state= </span><span class="k">new</span> <span class="nx">Model</span> <span class="nx">name</span><span class="o">:</span><span class="s">'Matt'</span>
+
+<span class="nv">Page= </span><span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span>
+  <span class="nv">render: </span><span class="nf">-&gt;</span>
+    <span class="p">(</span><span class="nx">div</span> <span class="nx">_</span><span class="p">,</span>
+      <span class="s">"Welcome, </span><span class="si">#{</span> <span class="nx">@props</span><span class="p">.</span><span class="nx">name</span> <span class="si">}</span><span class="s">"</span>
+    <span class="p">)</span>
+
+<span class="nx">state</span><span class="p">.</span><span class="nx">onChange</span> <span class="nf">-&gt;</span>
+  <span class="nx">React</span><span class="p">.</span><span class="nx">renderComponent</span> <span class="p">(</span><span class="nx">Page</span> <span class="nx">state</span><span class="p">.</span><span class="nx">toProps</span><span class="p">()),</span> <span class="nb">document</span><span class="p">.</span><span class="nx">body</span>
+
+<span class="vi">@onload= </span><span class="nf">-&gt;</span>
+  <span class="nx">state</span><span class="p">.</span><span class="nx">set</span> <span class="nx">loaded</span><span class="o">:</span><span class="kc">yes</span>
+</pre></div>
+
+<h1>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
+
+<p>Document:</p>
+
+<ul>
+<li><code>Model</code></li>
+<li><code>List</code></li>
+<li><code>Hash</code></li>
+</ul><p>Test!</p>
+        </section>
+
+        <footer>
+          Sdo.js is maintained by <a href="https://github.com/darthapo">darthapo</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
