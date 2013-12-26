@@ -18,9 +18,41 @@ Can extend the `Model` too, of course:
 
 ```coffeescript
 class User extends Model
-  default: ->
+  defaults: ->
     name: ''
     email: ''
 
 user= new User
 ```
+
+I use this with small React projects:
+
+```coffeescript
+{div}= React.DOM
+_= null
+
+state= new Model name:'Matt'
+
+Page= React.createClass
+  render: ->
+    (div _,
+      "Welcome, #{ @props.name }"
+    )
+
+state.onChange ->
+  React.renderComponent (Page state.toProps()), document.body
+
+@onload= ->
+  state.set loaded:yes
+```
+
+# TODO
+
+Document:
+
+- `Model`
+- `List`
+- `Hash`
+
+Test!
+
