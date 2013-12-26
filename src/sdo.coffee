@@ -38,8 +38,8 @@ clone= (obj)->
 makeArray= (args) ->
   _slice.call(args, 0)
 
-arrayWithoutArray= (source, target)->
-  item for item in source when item not in target
+# arrayWithoutArray= (source, target)->
+#   item for item in source when item not in target
 
 arrayWithout= (source, target)->
   item for item in source when item not target
@@ -93,14 +93,28 @@ class Model extends _Evented
     defaults= resultFor(this, 'defaults') or {}
     @atts= extend {}, atts, defaults
   
-  set: (key, value)->
-    if type(key) is 'string'
-      if value isnt @atts[key]
-        @atts[key]= value
-        @_changed [key]
+  setPair: (key, value, _silent)->
+    if value isnt @atts[key]
+      @atts[key]= value
+      @_changed([key]) unless _silent
+      yes
     else
-      extend @atts, key
-      @_changed _.keys(key)
+      no
+
+  set: (keyOrValues, value)->
+    if type(keyOrValues) is 'string'
+      @setPair keyOrValues, value
+    else
+      keys= []
+      for own k,v of keyOrValues
+        keys.push(k) if @setPair k, v, yes
+      if keys.length > 0
+        @_changed(keys)
+        yes
+      else
+        no
+      # extend @atts, key
+      # @_changed _.keys(key)
 
   get: (key)->
     if arguments.length is 0
@@ -109,7 +123,8 @@ class Model extends _Evented
       @atts[key]
 
   toProps: ->
-    clone @atts
+    # clone @atts
+    @atts
 
 
 class List extends _Evented
@@ -149,9 +164,10 @@ class List extends _Evented
   #   this
 
   toProps: ->
-    data= []
-    data.push model.toProps() for model in @_list
-    data
+    # data= []
+    # data.push model.toProps() for model in @_list
+    # data
+    model.toProps() for model in @_list
   
 
 class Hash extends _Evented
@@ -164,7 +180,7 @@ class Hash extends _Evented
   add: (key, model)->
     model = new model() if type(model) is 'function'
     @[key]= model
-    @_keys.push= key
+    @_keys.push key
     # @_keys= _.uniq @_keys
     model.onChange(@_changed)
     this
@@ -180,9 +196,19 @@ class Hash extends _Evented
       null
 
   toProps: ->
-    data= {}
-    data[key]= data[key].toProps() for key in @_keys
+    data={}
+    data[key]= @[key].toProps() for key in @_keys
     data
+
+api= {
+  uid
+  type
+  extend
+  defaults  
+  Model
+  List
+  Hash
+}
 
 if module?
   module?.exports= {Model, List, Hash}
