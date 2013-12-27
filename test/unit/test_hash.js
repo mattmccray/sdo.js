@@ -110,6 +110,48 @@ describe('Hash', function(){
     
   })
 
+  it('should propagate change events from nested hashes', function() {
+    var count= 0,
+        child= Hash({ 
+          name:'Kid' 
+        }),
+        parent= Hash({
+          name:'Sir',
+          child:child
+        })
+    parent.onChange(function() {
+      count += 1
+    })
+
+    parent.set('name', 'Maam')
+    expect( count ).to.equal(1)
+
+    child.set('name', 'Terror')
+    expect( count ).to.equal(2)
+    
+  })
+
+  it('should propagate change events from nested lists', function() {
+    var count= 0,
+        favs= List(['chocolate']),
+        person= Hash({
+          name:'Dude',
+          favs:favs
+        })
+    
+    person.onChange(function() {
+      // console.log("onChange", arguments)
+      count += 1
+    })
+
+    person.set('name', 'Dudette')
+    expect( count ).to.equal(1)
+
+    favs.add('fast cars')
+    expect( count ).to.equal(2)
+    
+  })
+
   // xit('should allow sub classing', function() {
   //   var User= SDO.Hash.extend({
   //     stuff: function() {
