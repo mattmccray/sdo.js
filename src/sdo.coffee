@@ -1,8 +1,9 @@
 # Simple Data Objects
 # v0.2.0
-
+_root= this
 _slice= Array::slice
 _toString= Object::toString
+_hasOwn= Object::hasOwnProperty
 
 type= do ->
   elemParser= /\[object HTML(.*)\]/
@@ -67,9 +68,9 @@ uid= (radix=36)->
   now.toString radix
 
 
-# Class: _Evented
+# Class: Base
 # Used internally for tracking/firing onChange events
-class _Evented
+class Base
   constructor: (callback)->
     @_callbacks= []
     @onChange(callback) if callback?
@@ -78,7 +79,8 @@ class _Evented
     if remove
       @_callbacks= arrayWithout @_callbacks, callback
     else
-      @_callbacks.push callback
+      unless callback in @_callbacks
+        @_callbacks.push callback
     this
     
   _changed: (params...)=>
@@ -87,20 +89,20 @@ class _Evented
 
 # Class: Hash
 # Name/Value Pair container
-class Hash extends _Evented
+class Hash extends Base
   constructor: (atts, callback)->
     if type(atts) is 'function'
       callback= atts
       atts= {}
     atts or= {}
     super callback
-    defaults= resultFor(this, 'defaults') or {}
-    @atts= extend {}, atts, defaults
+    defaultValues= resultFor(this, 'defaults') or {}
+    @_atts= extend {}, defaultValues, atts
   
   setPair: (key, value, _silent)->
-    if value isnt @atts[key]
-      @atts[key]= value
-      @_changed([key]) unless _silent
+    if value isnt @_atts[key]
+      @_atts[key]= value
+      @_changed([key], this) unless _silent
       yes
     else
       no
@@ -113,26 +115,35 @@ class Hash extends _Evented
       for own k,v of keyOrValues
         keys.push(k) if @setPair k, v, yes
       if keys.length > 0
-        @_changed(keys)
+        @_changed(keys, this)
         yes
       else
         no
-      # extend @atts, key
+      # extend @_atts, key
       # @_changed _.keys(key)
 
   get: (key)->
     if arguments.length is 0
-      @atts
+      @_atts
     else
-      @atts[key]
+      @_atts[key]
+
+  remove: (key)->
+    if _hasOwn.call(@_atts, key)
+      val= @_atts[key]
+      delete @_atts[key]
+      @_changed(key)
+      val
+    else
+      null
 
   toProps: ->
-    # clone @atts
-    @atts
+    # clone @_atts
+    @_atts
 
 # Class: List
 # List container.
-class List extends _Evented
+class List extends Base
   constructor: (callback)->
     super callback
     @_list=[]
@@ -147,9 +158,10 @@ class List extends _Evented
       throw new Error "To create items you must specify a ItemClass property."
 
   add: (model)->
-    @_list.push model
-    # @_list= _.sortBy(@_comparator) if @_comparator?
-    model.onChange @_changed
+    unless model in @_list
+      @_list.push model
+      # @_list= _.sortBy(@_comparator) if @_comparator?
+      model.onChange @_changed
     this
   
   remove: (model)->
@@ -176,19 +188,18 @@ class List extends _Evented
   
 # Class: Group
 # Not a great name, basically a decorator for composing multipled, name, Hashes.
-class Graph extends _Evented
+class Graph extends Base
   constructor: (models, callback)->
     super callback
     @_keys= []
-    if models?
+    if type models is 'object'
       @add(key, model) for own key,model of models
 
   add: (key, model)->
     model = new model() if type(model) is 'function'
     @[key]= model
-    @_keys.push key
-    # @_keys= _.uniq @_keys
-    model.onChange(@_changed)
+    @_keys.push(key) unless key in @_keys
+    model.onChange @_changed
     this
 
   remove: (key)->
@@ -211,6 +222,43 @@ class Graph extends _Evented
     data={}
     data[key]= @[key].toProps() for key in @_keys
     data
+
+
+# Based on Backbone's extend, which is - in turn - based on Google's goog.inherits
+inherits= (protoProps, staticProps)->
+  parent= this
+
+  # The constructor function for the new subclass is either defined by you
+  # (the "constructor" property in your `extend` definition), or defaulted
+  # by us to simply call the parent's constructor.
+  child= if protoProps? and _hasOwn.call(protoProps, 'constructor')
+    protoProps.constructor
+  else
+    -> parent.apply this, arguments
+
+  # Add static properties to the constructor function, if supplied.
+  extend child, parent, staticProps
+
+  # Set the prototype chain to inherit from `parent`, without calling
+  # `parent`'s constructor function.
+  Surrogate= -> 
+    @constructor= child
+    @
+  Surrogate::= parent::
+  child::= new Surrogate
+
+  # Add prototype properties (instance properties) to the subclass,
+  # if supplied.
+  if protoProps?
+    extend child::, protoProps
+
+  # Set a convenience property in case the parent's prototype is needed
+  # later.
+  child.__super__= parent::
+
+  child
+
+Graph.extend= List.extend= Hash.extend= inherits
 
 api= {
   uid
