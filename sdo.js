@@ -107,6 +107,12 @@
         callback.apply(null, params);
       }
       return this;
+    },
+    dispose: function() {
+      if (this._listeners == null) {
+        return this;
+      }
+      return this._listeners.length = 0;
     }
   };
 
@@ -189,6 +195,20 @@
       } else {
         return null;
       }
+    },
+    clear: function(_silent) {
+      var key, keys, value, _ref;
+      keys = [];
+      _ref = this._atts;
+      for (key in _ref) {
+        value = _ref[key];
+        this.remove(key, true);
+        keys.push(key);
+      }
+      if (!_silent) {
+        this._changed(keys, this);
+      }
+      return this;
     },
     toString: function() {
       return "[object Hash]";
@@ -278,6 +298,18 @@
     },
     items: function() {
       return this._list;
+    },
+    clear: function(_silent) {
+      var value, _i, _len, _ref;
+      _ref = this._list;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        value = _ref[_i];
+        this.remove(value, true);
+      }
+      if (!_silent) {
+        this._changed('clear', this);
+      }
+      return this;
     },
     toString: function() {
       return "[object List]";

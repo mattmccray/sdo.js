@@ -106,6 +106,10 @@ describe('Hash', function(){
     
   })
 
+  xit('should merge hashes/lists on set', function() {
+    
+  })
+
   // xit('should allow sub classing', function() {
   //   var User= SDO.Hash.extend({
   //     stuff: function() {

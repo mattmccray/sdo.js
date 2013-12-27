@@ -53,6 +53,11 @@ OnChangeImpl=
     callback(params...) for callback in @_listeners
     this
 
+  dispose: ->
+    return this unless @_listeners?
+    @_listeners.length= 0
+
+
 HashImpl= extend {}, OnChangeImpl,
   type: 'hash'
   isHash: true
@@ -101,6 +106,14 @@ HashImpl= extend {}, OnChangeImpl,
     else
       null
 
+  clear: (_silent)->
+    keys=[]
+    for key,value of @_atts
+      @remove(key, true)
+      keys.push key
+    @_changed(keys, this) unless _silent
+    this
+
   toString: -> "[object Hash]"
 
 Hash= (base={}, callback)->
@@ -146,6 +159,12 @@ ListImpl= extend {}, OnChangeImpl,
 
   items: -> 
     @_list
+
+  clear: (_silent)->
+    for value in @_list
+      @remove(value, true)
+    @_changed('clear', this) unless _silent
+    this
 
   toString: -> "[object List]"
 
