@@ -48,11 +48,10 @@ state.onChange ->
 
 # TODO
 
-Document:
-
-- `Model`
-- `List`
-- `Hash`
-
-Test!
+- Document:
+  - `Hash`
+  - `List`
+  - `Graph`
+- Test!
+- npm
 

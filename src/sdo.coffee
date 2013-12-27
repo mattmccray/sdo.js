@@ -1,4 +1,5 @@
 # Simple Data Objects
+# v0.2.0
 
 _slice= Array::slice
 _toString= Object::toString
@@ -66,6 +67,8 @@ uid= (radix=36)->
   now.toString radix
 
 
+# Class: _Evented
+# Used internally for tracking/firing onChange events
 class _Evented
   constructor: (callback)->
     @_callbacks= []
@@ -82,8 +85,9 @@ class _Evented
     callback(params...) for callback in @_callbacks
     this
 
-
-class Model extends _Evented
+# Class: Hash
+# Name/Value Pair container
+class Hash extends _Evented
   constructor: (atts, callback)->
     if type(atts) is 'function'
       callback= atts
@@ -126,7 +130,8 @@ class Model extends _Evented
     # clone @atts
     @atts
 
-
+# Class: List
+# List container.
 class List extends _Evented
   constructor: (callback)->
     super callback
@@ -134,12 +139,12 @@ class List extends _Evented
     @_comparator= null
 
   create: (atts={})->
-    if @Model?
-      model= new @Model atts
+    if @ItemClass?
+      model= new @ItemClass atts
       @add model
       model
     else
-      throw new Error "To create models you must specify a Model property."
+      throw new Error "To create items you must specify a ItemClass property."
 
   add: (model)->
     @_list.push model
@@ -169,8 +174,9 @@ class List extends _Evented
     # data
     model.toProps() for model in @_list
   
-
-class Hash extends _Evented
+# Class: Group
+# Not a great name, basically a decorator for composing multipled, name, Hashes.
+class Graph extends _Evented
   constructor: (models, callback)->
     super callback
     @_keys= []
@@ -195,6 +201,12 @@ class Hash extends _Evented
     else
       null
 
+  set: (name, key, value)->
+    @[name].set(key, value)
+  
+  get: (name, key)->
+    @[name].get(key)
+
   toProps: ->
     data={}
     data[key]= @[key].toProps() for key in @_keys
@@ -205,12 +217,12 @@ api= {
   type
   extend
   defaults  
-  Model
-  List
   Hash
+  List
+  Graph
 }
 
 if module?
-  module?.exports= {Model, List, Hash}
+  module?.exports= api
 else
-  @SDO= {Model, List, Hash}
+  @SDO= api
