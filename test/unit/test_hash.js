@@ -1,19 +1,19 @@
 
-describe('SDO.Hash', function(){
+describe('Hash', function(){
 
   it('should exist', function(){
-      expect(SDO.Hash).to.exist
+      expect(Hash).to.exist
       //expect(this.model.password).to.exist
   })
 
   it('should accept initial values in constructor', function() {
-    var h= new SDO.Hash({ name:'test' })
+    var h= Hash({ name:'test' })
     // .atts is internal, you should reach in like this yourself
     expect( h._atts ).to.deep.equal({ name:'test' })
   })
 
   it('should allow attribute access via get/set', function() {
-    var h= new SDO.Hash({ name:'test' })
+    var h= Hash({ name:'test' })
     expect( h.get('name') ).to.equal('test')
     
     h.set('name', 'other')
@@ -24,7 +24,7 @@ describe('SDO.Hash', function(){
   })
 
   it('should fire onChange handlers', function() {
-    var h= new SDO.Hash({ name:'test' }),
+    var h= Hash({ name:'test' }),
         count= 0
     
     h.onChange(function(keys, hash){
@@ -47,7 +47,7 @@ describe('SDO.Hash', function(){
   })
 
   it('should batch onChange call when setting multiple values', function() {
-    var h= new SDO.Hash({ name:'test' }),
+    var h= Hash({ name:'test' }),
         count= 0
     
     h.onChange(function(keys){
@@ -64,7 +64,7 @@ describe('SDO.Hash', function(){
   })
 
   it('should send the keys of only the changed properties to onChange', function() {
-    var h= new SDO.Hash({ name:'test' }),
+    var h= Hash({ name:'test' }),
         count= 0
     
     h.onChange(function(keys){
@@ -82,66 +82,72 @@ describe('SDO.Hash', function(){
     
   })
 
-  it('should allow sub classing', function() {
-    var User= SDO.Hash.extend({
-      stuff: function() {
-        return 'user'
-      }
+  it('should flatten out hashes if get is called with no index', function() {
+    var h= Hash({
+      page: Hash({
+        current: 'home'
+      }),
+      prefs: Hash({
+        autoLogin: true
+      })
     })
-
-
-    var user= new User({ name:'viper' })
-    expect(user).to.exist
-    
-    expect(user).to.have.property('get')
-    expect(user).to.have.property('set')
-    expect(user).to.have.property('stuff')
-    
-    expect(user.get).to.be.a.Function
-    expect(user.set).to.be.a.Function
-    expect(user.stuff).to.be.a.Function
-
-    expect(user.get('name')).to.equal('viper')
-    expect(user.stuff()).to.equal('user')
+    var expected= {
+      page: {
+        current: 'home'
+      },
+      prefs: {
+        autoLogin: true
+      }
+    }
+    expect( h.get() ).to.deep.equal(expected)
   })
 
-  it('should be populated with defaults() if they exist', function() {
-    var User= SDO.Hash.extend({
-      defaults: function() {
-        return {
-          type: 'user'
-        }
-      }
-    })
-
-    var user= new User({ name:'viper' })
-    expect(user).to.exist
-    expect(user.get('type')).to.equal('user')
-    expect(user.get('name')).to.equal('viper')
-
-    var user2= new User({ name:'gunstar', type:'admin' })
-    expect(user2).to.exist
-    expect(user2.get('type')).to.equal('admin')
-    expect(user2.get('name')).to.equal('gunstar')
+  xit('should not try to track null values', function() {
     
   })
 
-  // describe('...', function(){
-  //   beforeEach(function() {
-  //     this.model = new SDO.Hash({ 
-  //       username:'', 
-  //       password:'' 
-  //     })
+  // xit('should allow sub classing', function() {
+  //   var User= SDO.Hash.extend({
+  //     stuff: function() {
+  //       return 'user'
+  //     }
   //   })
 
-  //   afterEach(function() {
-  //     this.model= null
+
+  //   var user= new User({ name:'viper' })
+  //   expect(user).to.exist
+    
+  //   expect(user).to.have.property('get')
+  //   expect(user).to.have.property('set')
+  //   expect(user).to.have.property('stuff')
+    
+  //   expect(user.get).to.be.a.Function
+  //   expect(user.set).to.be.a.Function
+  //   expect(user.stuff).to.be.a.Function
+
+  //   expect(user.get('name')).to.equal('viper')
+  //   expect(user.stuff()).to.equal('user')
+  // })
+
+  // xit('should be populated with defaults() if they exist', function() {
+  //   var User= SDO.Hash.extend({
+  //     defaults: function() {
+  //       return {
+  //         type: 'user'
+  //       }
+  //     }
   //   })
 
-  //   it('should create methods', function(){
-  //     expect(this.model.username).to.exist
-  //     expect(this.model.password).to.exist
-  //   })
+  //   var user= new User({ name:'viper' })
+  //   expect(user).to.exist
+  //   expect(user.get('type')).to.equal('user')
+  //   expect(user.get('name')).to.equal('viper')
+
+  //   var user2= new User({ name:'gunstar', type:'admin' })
+  //   expect(user2).to.exist
+  //   expect(user2.get('type')).to.equal('admin')
+  //   expect(user2.get('name')).to.equal('gunstar')
+    
   // })
 
 })

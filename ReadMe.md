@@ -1,28 +1,16 @@
 # Simple Data Objects
 
-This is experimental, really. Just simple data objects that have a single `onChange` callback support.
+This is experimental, really. Just simple data objects that support a single `onChange` callback.
 
 ```coffeescript
-user= new Model name:'', email:''
+user= Hash name:'', email:''
 
 user.onChange (keys)->
   console.log "changed", keys
-  # keys are actually the keys used in the #set() call, api may change
-
+  
 user.set 'name', 'Matt'
 # or
 user.set email:'my@email.org'
-```
-
-Can extend the `Model` too, of course:
-
-```coffeescript
-class User extends Model
-  defaults: ->
-    name: ''
-    email: ''
-
-user= new User
 ```
 
 I use this with small React projects:
@@ -31,7 +19,7 @@ I use this with small React projects:
 {div}= React.DOM
 _= null
 
-state= new Model name:'Matt'
+state= Hash( name:'Matt' )
 
 Page= React.createClass
   render: ->
@@ -40,18 +28,8 @@ Page= React.createClass
     )
 
 state.onChange ->
-  React.renderComponent (Page state.toProps()), document.body
+  React.renderComponent (Page state.get()), document.body
 
 @onload= ->
   state.set loaded:yes
 ```
-
-# TODO
-
-- Document:
-  - `Hash`
-  - `List`
-  - `Graph`
-- Test!
-- npm
-

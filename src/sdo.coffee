@@ -1,31 +1,28 @@
-# Simple Data Objects
-# v0.2.0
-_root= this
+# Hash and List
+
 _slice= Array::slice
 _toString= Object::toString
-_hasOwn= Object::hasOwnProperty
+
+Object.create or Object.create= do ->
+  F= ->
+  (o)->
+    F:: = o
+    return new F()
 
 type= do ->
   elemParser= /\[object HTML(.*)\]/
   classToType= {}
-  for name in "Boolean Number String Function Array Date RegExp Undefined Null NodeList".split(" ")
+  for name in "Array Boolean Date Function NodeList Null Number RegExp String Undefined ".split(" ")
     classToType["[object " + name + "]"] = name.toLowerCase()
   (obj) ->
     strType = _toString.call(obj)
+    # strType = String(obj)
     if found= classToType[strType]
       found
     else if found= strType.match(elemParser)
       found[1].toLowerCase()
     else
       "object"
-
-defaults= (obj)->
-  for source in _slice.call(arguments, 1)
-    if source
-      for key,value of source
-        unless obj[key]?
-          obj[key]= value
-  obj
 
 extend= (obj)->
   for source in _slice.call(arguments, 1)
@@ -34,243 +31,145 @@ extend= (obj)->
         obj[key]= value
   obj
 
-clone= (obj)->
-  extend {}, obj
-
-makeArray= (args) ->
-  _slice.call(args, 0)
-
-# arrayWithoutArray= (source, target)->
-#   item for item in source when item not in target
-
-arrayWithout= (source, target)->
-  item for item in source when item not target
-
-isBlank= (value) ->
-  return true unless value
-  return false for key of value
-  true
-
-hasKey= (obj, key)-> `(key in obj)`
-
-resultFor= (obj, key)->
-  if hasKey obj, key
-    prop= obj[key]
-    prop?() or prop
-  else
-    undefined
-
 uid= (radix=36)->
   now= (new Date).getTime()
-  while now <= uid._lastTimestamp or 0
+  while now <= uid._prev or 0
     now += 1
-  uid._lastTimestamp= now
+  uid._prev= now
   now.toString radix
 
-
-# Class: Base
-# Used internally for tracking/firing onChange events
-class Base
-  constructor: (callback)->
-    @_callbacks= []
-    @onChange(callback) if callback?
-  
-  onChange: (callback, remove=false)->
-    if remove
-      @_callbacks= arrayWithout @_callbacks, callback
+OnChangeImpl=
+  onChange: (cb, listen=true)->
+    @_listeners or= []
+    if listen
+      unless cb in @_listeners
+        @_listeners.push cb
     else
-      unless callback in @_callbacks
-        @_callbacks.push callback
-    this
-    
-  _changed: (params...)=>
-    callback(params...) for callback in @_callbacks
+      @_listeners= (fn for fn in @_listeners when fn isnt cb)
     this
 
-# Class: Hash
-# Name/Value Pair container
-class Hash extends Base
-  constructor: (atts, callback)->
-    if type(atts) is 'function'
-      callback= atts
-      atts= {}
-    atts or= {}
-    super callback
-    defaultValues= resultFor(this, 'defaults') or {}
-    @_atts= extend {}, defaultValues, atts
-  
+  _changed: (params...)->
+    return this unless @_listeners? and @_listeners.length > 0
+    callback(params...) for callback in @_listeners
+    this
+
+HashImpl= extend {}, OnChangeImpl,
+  type: 'hash'
+  isHash: true
+  isList: false
+
   setPair: (key, value, _silent)->
     if value isnt @_atts[key]
+      oldValue= @_atts[key]
+      oldValue?.onChange?(@_changed, false)
       @_atts[key]= value
       @_changed([key], this) unless _silent
+      value?.onChange?(@_changed)
       yes
     else
       no
 
-  set: (keyOrValues, value)->
+  set: (keyOrValues, value, _silent)->
     if type(keyOrValues) is 'string'
-      @setPair keyOrValues, value
+      @setPair keyOrValues, value, _silent
     else
       keys= []
       for own k,v of keyOrValues
         keys.push(k) if @setPair k, v, yes
       if keys.length > 0
-        @_changed(keys, this)
+        @_changed(keys, this) unless _silent
         yes
       else
         no
-      # extend @_atts, key
-      # @_changed _.keys(key)
 
   get: (key)->
     if arguments.length is 0
-      @_atts
+      atts={}
+      for key,value of @_atts
+        atts[key]= value?.get?() or value
+      atts
     else
       @_atts[key]
 
-  remove: (key)->
+  remove: (key, _silent)->
     if _hasOwn.call(@_atts, key)
       val= @_atts[key]
+      val.onChange?(@_changed, false)
       delete @_atts[key]
-      @_changed(key)
+      @_changed([key], this) unless _silent
       val
     else
       null
 
-  toProps: ->
-    # clone @_atts
-    @_atts
+  toString: -> "[object Hash]"
 
-# Class: List
-# List container.
-class List extends Base
-  constructor: (callback)->
-    super callback
-    @_list=[]
-    @_comparator= null
+Hash= (base={}, callback)->
+  hash= Object.create(HashImpl)
+  hash._atts= {}
+  hash.set(base, null, true)
+  hash.onChange(callback) if callback?
+  hash._changed= hash._changed.bind(hash)
+  hash
 
-  create: (atts={})->
-    if @ItemClass?
-      model= new @ItemClass atts
-      @add model
-      model
-    else
-      throw new Error "To create items you must specify a ItemClass property."
 
-  add: (model)->
-    unless model in @_list
-      @_list.push model
-      # @_list= _.sortBy(@_comparator) if @_comparator?
-      model.onChange @_changed
+ListImpl= extend {}, OnChangeImpl,
+  type: 'list'
+  isHash: false
+  isList: true
+
+  add: (value, _silent)->
+    unless value in @_list
+      @_list.push value
+      value?.onChange? @_changed
+      @length= @_list.length
+      @_changed('add', this, value) unless _silent
+    this
+
+  addAll: (values, _silent)->
+    for value in values
+      @add value, _silent
     this
   
-  remove: (model)->
-    @_list= arrayWithout @_list, model
-    model.onChange @_changed, true
+  remove: (value, _silent)->
+    # @_list= arrayWithout @_list, model
+    @_list= (val for val in @_list when val isnt value)
+    value?.onChange? @_changed, true
+    @length= @_list.length
+    @_changed('remove', this, value) unless _silent
     this
 
   get: (index) -> 
     if arguments.length is 0
-      @_list
+      (val?.get?() or val for val in @_list)
     else
      @_list[index]
-  
-  # sort: (comparator)->
-  #   @_comparator= comparator
-  #   @_list= _.sortBy(@_comparator) if @_comparator?
-  #   this
 
-  toProps: ->
-    # data= []
-    # data.push model.toProps() for model in @_list
-    # data
-    model.toProps() for model in @_list
-  
-# Class: Group
-# Not a great name, basically a decorator for composing multipled, name, Hashes.
-class Graph extends Base
-  constructor: (models, callback)->
-    super callback
-    @_keys= []
-    if type models is 'object'
-      @add(key, model) for own key,model of models
+  items: -> 
+    @_list
 
-  add: (key, model)->
-    model = new model() if type(model) is 'function'
-    @[key]= model
-    @_keys.push(key) unless key in @_keys
-    model.onChange @_changed
-    this
+  toString: -> "[object List]"
 
-  remove: (key)->
-    model= @[key]
-    if model?
-      model.onChange @_changed, true
-      delete @[key]
-      @_keys= arrayWithout @_keys, key
-      model
-    else
-      null
+List= (base=[], callback)->
+  list= Object.create(ListImpl)
+  list._list=[]
+  list.addAll(base, true)
+  list.onChange(callback) if callback?
+  list._changed= list._changed.bind(list)
+  list
 
-  set: (name, key, value)->
-    @[name].set(key, value)
-  
-  get: (name, key)->
-    @[name].get(key)
-
-  toProps: ->
-    data={}
-    data[key]= @[key].toProps() for key in @_keys
-    data
-
-
-# Based on Backbone's extend, which is - in turn - based on Google's goog.inherits
-inherits= (protoProps, staticProps)->
-  parent= this
-
-  # The constructor function for the new subclass is either defined by you
-  # (the "constructor" property in your `extend` definition), or defaulted
-  # by us to simply call the parent's constructor.
-  child= if protoProps? and _hasOwn.call(protoProps, 'constructor')
-    protoProps.constructor
-  else
-    -> parent.apply this, arguments
-
-  # Add static properties to the constructor function, if supplied.
-  extend child, parent, staticProps
-
-  # Set the prototype chain to inherit from `parent`, without calling
-  # `parent`'s constructor function.
-  Surrogate= -> 
-    @constructor= child
-    @
-  Surrogate::= parent::
-  child::= new Surrogate
-
-  # Add prototype properties (instance properties) to the subclass,
-  # if supplied.
-  if protoProps?
-    extend child::, protoProps
-
-  # Set a convenience property in case the parent's prototype is needed
-  # later.
-  child.__super__= parent::
-
-  child
-
-Graph.extend= List.extend= Hash.extend= inherits
-
-api= {
-  uid
-  type
-  extend
-  defaults  
-  Hash
-  List
-  Graph
-}
 
 if module?
-  module?.exports= api
+  module.exports.Hash= Hash
+  module.exports.List= List
+  module.exports.type= type
+  module.exports.uid= uid
 else
-  @SDO= api
+  @Hash= Hash
+  @List= List
+  @type= type
+  @uid= uid
+  # if @type?
+  #   @originalType= @type
+  #   console?.warn?("Old window.type has been replaced. You can access the previous version at window.originalType")
+    
+
