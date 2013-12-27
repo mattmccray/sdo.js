@@ -33,3 +33,4 @@ state.onChange ->
 @onload= ->
   state.set loaded:yes
 ```
+./node_modules/.bin/coffee -c -p src/sdo.coffee >> sdo.js
