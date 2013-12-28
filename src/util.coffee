@@ -49,24 +49,24 @@ uid= do ->
 #   uid._prev= now
 #   now.toString radix
 
-OnChangeImpl=
-  onChange: (cb, listen=true)->
-    @_listeners or= []
-    if listen
-      unless cb in @_listeners
-        @_listeners.push cb
-    else
-      @_listeners= (fn for fn in @_listeners when fn isnt cb)
-    this
+# OnChangeImpl=
+#   onChange: (cb, listen=true)->
+#     @_listeners or= []
+#     if listen
+#       unless cb in @_listeners
+#         @_listeners.push cb
+#     else
+#       @_listeners= (fn for fn in @_listeners when fn isnt cb)
+#     this
 
-  _changed: (params...)->
-    return this unless @_listeners? and @_listeners.length > 0
-    callback(params...) for callback in @_listeners
-    this
+#   _changed: (params...)->
+#     return this unless @_listeners? and @_listeners.length > 0
+#     callback(params...) for callback in @_listeners
+#     this
 
-  dispose: ->
-    return this unless @_listeners?
-    @_listeners.length= 0
+#   dispose: ->
+#     return this unless @_listeners?
+#     @_listeners.length= 0
 
 
 ((root)-> 

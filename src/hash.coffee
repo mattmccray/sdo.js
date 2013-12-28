@@ -22,9 +22,9 @@ setObject= (atts, hash, _silent, _changed)->
 
 Hash= (source, callback)->
   _atts= {} #extend {}, source
-  _listeners= []
+  _listeners= null
   _changed= (keys)->
-    return null unless _listeners.length > 0
+    return null unless _listeners and _listeners.length > 0
     callback(keys, hash) for callback in _listeners
 
   hash=
@@ -45,6 +45,7 @@ Hash= (source, callback)->
         atts
 
     onChange: (fn, remove)->
+      _listeners= [] unless _listeners?
       if remove
         _listeners= excise fn, _listeners
       else
