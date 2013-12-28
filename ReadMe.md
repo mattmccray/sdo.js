@@ -19,7 +19,13 @@ I use this with small React projects:
 {div}= React.DOM
 _= null
 
-state= Hash( name:'Matt' )
+state= Hash( 
+  name:'Matt' 
+  todos: List([
+    Hash( title:'A todo', done:no )
+    Hash( title:'Another todo', done:no )
+  ])
+)
 
 Page= React.createClass
   render: ->
@@ -33,4 +39,3 @@ state.onChange ->
 @onload= ->
   state.set loaded:yes
 ```
-./node_modules/.bin/coffee -c -p src/sdo.coffee >> sdo.js
