@@ -30,12 +30,24 @@ extend= (obj)->
         obj[key]= value
   obj
 
-uid= (radix=36)->
-  now= (new Date).getTime()
-  while now <= uid._prev or 0
-    now += 1
-  uid._prev= now
-  now.toString radix
+excise= (item, list)->
+  (listitem for listitem in list when listitem isnt item)
+
+uid= do ->
+  last=0
+  radix=36
+  ->
+    now= (new Date).getTime()
+    now += 1 while now <= last
+    last= now
+    now.toString(radix)
+
+# uid= (radix=36)->
+#   now= (new Date).getTime()
+#   while now <= uid._prev or 0
+#     now += 1
+#   uid._prev= now
+#   now.toString radix
 
 OnChangeImpl=
   onChange: (cb, listen=true)->

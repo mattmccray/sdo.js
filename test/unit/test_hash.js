@@ -9,7 +9,8 @@ describe('Hash', function(){
   it('should accept initial values in constructor', function() {
     var h= Hash({ name:'test' })
     // .atts is internal, you should reach in like this yourself
-    expect( h._atts ).to.deep.equal({ name:'test' })
+    expect( h.get('name') ).to.deep.equal('test')
+    expect( h.get() ).to.deep.equal({ name:'test' })
   })
 
   it('should allow attribute access via get/set', function() {
@@ -197,3 +198,101 @@ describe('Hash', function(){
   // })
 
 })
+
+// function perfHash() {
+
+//   simplePerf('Hash', {}, {
+//     'v1 test': function() {
+//       var h= Hash({ name:'matt' }),
+//           count=  0,
+//           incr= function() { count += 1 }
+//       h.onChange(incr)
+//       h.set('name', 'Dan')
+//       h.get('name')
+//       h.set({ name:'Sam' })
+//       h.get('name')
+//       h.onChange(incr, true)
+//       h.set({
+//         a:'A',
+//         b:'B'
+//       })
+//       h.onChange(incr)
+//       h.set({
+//         a:'A',
+//         b:'B',
+//         c:'A',
+//         d:'B',
+//         e: 'E',
+//         f: 'F'
+//       })
+
+//       h.onChange(incr, true)
+//   },
+//   // 'v2 test': function() {
+//   //     var h= Hash2({ name:'matt' }),
+//   //         count=  0,
+//   //         incr= function() { count += 1 }
+//   //     h.onChange(incr)
+//   //     h.set('name', 'Dan')
+//   //     h.get('name')
+//   //     h.set({ name:'Sam' })
+//   //     h.get('name')
+//   //     h.onChange(incr, true)
+//   //     h.set({
+//   //       a:'A',
+//   //       b:'B'
+//   //     })
+//   //     h.onChange(incr)
+//   //     h.set({
+//   //       a:'A',
+//   //       b:'B',
+//   //       c:'A',
+//   //       d:'B',
+//   //       e: 'E',
+//   //       f: 'F'
+//   //     })
+//   // },
+//   'v1 mass construction': function() {
+//     var x= Hash({ name:'Matt' }),
+//         count= 0,
+//         h= Hash({
+//           a: Hash({
+//             b: Hash({
+//               c: Hash({
+//                 x:x
+//               })
+//             })
+//           })
+//         })
+//     h.onChange(function() {
+//       count += 1
+//     })
+//     x.set('name', 'Dan')
+//     if(count != 1) {
+//       throw new Error("expected callback count to be 1, was "+ count)
+//     }
+//   },
+// //     'v2 mass construction': function() {
+// //     var x= Hash2({ name:'Matt' }),
+// //         count= 0,
+// //         h= Hash2({
+// //           a: Hash2({
+// //             b: Hash2({
+// //               c: Hash2({
+// //                 x:x
+// //               })
+// //             })
+// //           })
+// //         })
+// //     h.onChange(function() {
+// //       count += 1
+// //     })
+// //     x.set('name', 'Dan')
+// //     if(count != 1) {
+// //       throw new Error("expected callback count to be 1, was "+ count)
+// //     }
+// //   }
+// })
+
+
+// }
