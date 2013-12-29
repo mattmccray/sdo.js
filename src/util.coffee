@@ -1,12 +1,7 @@
+
 _global= this
 _slice= Array::slice
 _toString= Object::toString
-
-# Object.create or Object.create= do ->
-#   F= ->
-#   (o)->
-#     F:: = o
-#     return new F()
 
 type= do ->
   elemParser= /\[object HTML(.*)\]/
@@ -15,23 +10,12 @@ type= do ->
     classToType["[object " + name + "]"] = name.toLowerCase()
   (obj) ->
     strType = _toString.call(obj)
-    # strType = String(obj)
     if found= classToType[strType]
       found
     else if found= strType.match(elemParser)
       found[1].toLowerCase()
     else
       "object"
-
-# extend= (obj)->
-#   for source in _slice.call(arguments, 1)
-#     if source
-#       for key,value of source
-#         obj[key]= value
-#   obj
-
-# excise= (item, list)->
-#   (listitem for listitem in list when listitem isnt item)
 
 uid= do ->
   last=0
@@ -42,38 +26,41 @@ uid= do ->
     last= now
     now.toString(radix)
 
-# uid= (radix=36)->
-#   now= (new Date).getTime()
-#   while now <= uid._prev or 0
-#     now += 1
-#   uid._prev= now
-#   now.toString radix
+expose= do ->
+  _root = (module?.exports) or _global
+  (ctx)->
+    for own key,value of ctx
+      throw new Error "#{key} already exists!" if key in _root
+      _root[key]= value
 
-# OnChangeImpl=
-#   onChange: (cb, listen=true)->
-#     @_listeners or= []
-#     if listen
-#       unless cb in @_listeners
-#         @_listeners.push cb
-#     else
-#       @_listeners= (fn for fn in @_listeners when fn isnt cb)
-#     this
+# defaults= (obj)->
+#   for source in _slice.call(arguments, 1)
+#     if source
+#       for key,value of source
+#         unless obj[key]?
+#           obj[key]= value
+#   obj
 
-#   _changed: (params...)->
-#     return this unless @_listeners? and @_listeners.length > 0
-#     callback(params...) for callback in @_listeners
-#     this
+# extend= (obj)->
+#   for source in _slice.call(arguments, 1)
+#     if source
+#       for key,value of source
+#         obj[key]= value
+#   obj
 
-#   dispose: ->
-#     return this unless @_listeners?
-#     @_listeners.length= 0
+# clone= (obj)->
+#   extend {}, obj
+
 
 class OnChange
-
+  # If fn is null and remove is true, it'll clear all listeners.
   onChange: (fn, remove)->
     @_listeners= [] unless @_listeners?
     if remove
-      @_listeners= (cb for cb in @_listeners when cb isnt fn) #excise fn, @_listeners
+      if fn?
+        @_listeners= (cb for cb in @_listeners when cb isnt fn)
+      else
+        @_listeners= []
     else
       unless fn in @_listeners
         @_listeners.push fn
@@ -83,14 +70,7 @@ class OnChange
     callback(data, this) for callback in @_listeners
 
 
-((root)-> 
-  root.uid= uid
-  root.type= type
-)(module?.exports or this)
-
-# if module?
-#   module.exports.type= type
-#   module.exports.uid= uid
-# else
-#   @type= type
-#   @uid= uid
+expose {
+  uid
+  type
+}

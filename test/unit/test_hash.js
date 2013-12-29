@@ -103,9 +103,6 @@ describe('Hash', function(){
     expect( h.get() ).to.deep.equal(expected)
   })
 
-  xit('should not try to track null values', function() {
-    
-  })
 
   xit('should merge hashes/lists on set', function() {
     
