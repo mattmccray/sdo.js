@@ -274,20 +274,10 @@
       return this;
     };
 
-    List.prototype.remove = function(value, _silent) {
-      var val;
-      this._list = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this._list;
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          val = _ref[_i];
-          if (val !== value) {
-            _results.push(val);
-          }
-        }
-        return _results;
-      }).call(this);
+    List.prototype.remove = function(index, _silent) {
+      var value;
+      value = this.get(index);
+      this._list.splice(index, 1);
       if (value != null) {
         if (typeof value.onChange === "function") {
           value.onChange(this._notifyChange, true);
