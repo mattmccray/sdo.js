@@ -103,9 +103,6 @@ describe('Hash', function(){
     expect( h.get() ).to.deep.equal(expected)
   })
 
-  xit('should not try to track null values', function() {
-    
-  })
 
   xit('should merge hashes/lists on set', function() {
     
@@ -199,100 +196,144 @@ describe('Hash', function(){
 
 })
 
-// function perfHash() {
+function perfHash() {
 
-//   simplePerf('Hash', {}, {
-//     'v1 test': function() {
-//       var h= Hash({ name:'matt' }),
-//           count=  0,
-//           incr= function() { count += 1 }
-//       h.onChange(incr)
-//       h.set('name', 'Dan')
-//       h.get('name')
-//       h.set({ name:'Sam' })
-//       h.get('name')
-//       h.onChange(incr, true)
-//       h.set({
-//         a:'A',
-//         b:'B'
-//       })
-//       h.onChange(incr)
-//       h.set({
-//         a:'A',
-//         b:'B',
-//         c:'A',
-//         d:'B',
-//         e: 'E',
-//         f: 'F'
-//       })
+  simplePerf('Hash', {}, {
+    'v1 test': function() {
+      var h= Hash({ name:'matt' }),
+          count=  0,
+          incr= function() { count += 1 }
+      h.onChange(incr)
+      h.set('name', 'Dan')
+      h.get('name')
+      h.set({ name:'Sam' })
+      h.get('name')
+      h.onChange(incr, true)
+      h.set({
+        a:'A',
+        b:'B'
+      })
+      h.onChange(incr)
+      h.set({
+        a:'A',
+        b:'B',
+        c:'A',
+        d:'B',
+        e: 'E',
+        f: 'F'
+      })
 
-//       h.onChange(incr, true)
-//   },
-//   // 'v2 test': function() {
-//   //     var h= Hash2({ name:'matt' }),
-//   //         count=  0,
-//   //         incr= function() { count += 1 }
-//   //     h.onChange(incr)
-//   //     h.set('name', 'Dan')
-//   //     h.get('name')
-//   //     h.set({ name:'Sam' })
-//   //     h.get('name')
-//   //     h.onChange(incr, true)
-//   //     h.set({
-//   //       a:'A',
-//   //       b:'B'
-//   //     })
-//   //     h.onChange(incr)
-//   //     h.set({
-//   //       a:'A',
-//   //       b:'B',
-//   //       c:'A',
-//   //       d:'B',
-//   //       e: 'E',
-//   //       f: 'F'
-//   //     })
-//   // },
-//   'v1 mass construction': function() {
-//     var x= Hash({ name:'Matt' }),
-//         count= 0,
-//         h= Hash({
-//           a: Hash({
-//             b: Hash({
-//               c: Hash({
-//                 x:x
-//               })
-//             })
-//           })
-//         })
-//     h.onChange(function() {
-//       count += 1
-//     })
-//     x.set('name', 'Dan')
-//     if(count != 1) {
-//       throw new Error("expected callback count to be 1, was "+ count)
-//     }
-//   },
-// //     'v2 mass construction': function() {
-// //     var x= Hash2({ name:'Matt' }),
-// //         count= 0,
-// //         h= Hash2({
-// //           a: Hash2({
-// //             b: Hash2({
-// //               c: Hash2({
-// //                 x:x
-// //               })
-// //             })
-// //           })
-// //         })
-// //     h.onChange(function() {
-// //       count += 1
-// //     })
-// //     x.set('name', 'Dan')
-// //     if(count != 1) {
-// //       throw new Error("expected callback count to be 1, was "+ count)
-// //     }
-// //   }
-// })
+      h.onChange(incr, true)
+  },
+  'v2 test': function() {
+      var h= Hash2({ name:'matt' }),
+          count=  0,
+          incr= function() { count += 1 }
+      h.onChange(incr)
+      h.set('name', 'Dan')
+      h.get('name')
+      h.set({ name:'Sam' })
+      h.get('name')
+      h.onChange(incr, true)
+      h.set({
+        a:'A',
+        b:'B'
+      })
+      h.onChange(incr)
+      h.set({
+        a:'A',
+        b:'B',
+        c:'A',
+        d:'B',
+        e: 'E',
+        f: 'F'
+      })
+  },
+  'v2 test 2 (using new Hash2)': function() {
+      var h= new Hash2({ name:'matt' }),
+          count=  0,
+          incr= function() { count += 1 }
+      h.onChange(incr)
+      h.set('name', 'Dan')
+      h.get('name')
+      h.set({ name:'Sam' })
+      h.get('name')
+      h.onChange(incr, true)
+      h.set({
+        a:'A',
+        b:'B'
+      })
+      h.onChange(incr)
+      h.set({
+        a:'A',
+        b:'B',
+        c:'A',
+        d:'B',
+        e: 'E',
+        f: 'F'
+      })
+  },
+  'v1 mass construction': function() {
+    var x= Hash({ name:'Matt' }),
+        count= 0,
+        h= Hash({
+          a: Hash({
+            b: Hash({
+              c: Hash({
+                x:x
+              })
+            })
+          })
+        })
+    h.onChange(function() {
+      count += 1
+    })
+    x.set('name', 'Dan')
+    if(count != 1) {
+      throw new Error("expected callback count to be 1, was "+ count)
+    }
+  },
+    'v2 mass construction': function() {
+    var x= Hash2({ name:'Matt' }),
+        count= 0,
+        h= Hash2({
+          a: Hash2({
+            b: Hash2({
+              c: Hash2({
+                x:x
+              })
+            })
+          })
+        })
+    h.onChange(function() {
+      count += 1
+    })
+    x.set('name', 'Dan')
+    if(count != 1) {
+      throw new Error("expected callback count to be 1, was "+ count)
+    }
+  },
+      'v2 mass construction 2 (new Hash2)': function() {
+    var x= new Hash2({ name:'Matt' }),
+        count= 0,
+        h= new Hash2({
+          a: new Hash2({
+            b: new Hash2({
+              c: new Hash2({
+                x:x
+              })
+            })
+          })
+        })
+    h.onChange(function() {
+      count += 1
+    })
+    x.set('name', 'Dan')
+    if(count != 1) {
+      throw new Error("expected callback count to be 1, was "+ count)
+    }
+  }
+})
 
 
-// }
+}
