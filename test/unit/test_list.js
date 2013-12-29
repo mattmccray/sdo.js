@@ -5,6 +5,31 @@ describe('List', function(){
       expect(List).to.exist
   })
 
+  it('should allow adding values', function() {
+    var list= List(),
+        count= 0
+    list.onChange(function() {
+      count += 1
+    })
+
+    list.add('First')
+    expect( list.length ).to.equal(1)
+    expect( count ).to.equal(1)
+  })
+
+  it('should allow removing values', function() {
+    var list= List(['first']),
+        count= 0
+    list.onChange(function() {
+      count += 1
+    })
+
+    list.remove(0)
+    expect( list.length ).to.equal(0)
+    expect( count ).to.equal(1)
+    
+  })
+
 })
 
 
