@@ -1,17 +1,80 @@
 # Simple Data Objects
 
-This is experimental, really. Just simple data objects that support a single `onChange` callback.
+Very simple data object layer with simple `onChange` callback support.
+
+You comprise your data model with just two object types: `Hash`, `List`
 
 ```coffeescript
-user= Hash name:'', email:''
-
-user.onChange (keys)->
-  console.log "changed", keys
-  
-user.set 'name', 'Matt'
-# or
-user.set email:'my@email.org'
+users= List(
+  Hash( name:'alice', email:'alice@test.com' )
+  Hash( name:'bob', email:'bob@test.com' )
+)
 ```
+
+Both `Hash` and `List` have an `onChange` method to register for changes.
+
+```coffeescript
+users.onChange (action, list)->
+  console.log "List changed", action
+```
+
+For Lists, the callback receives the action that took place (`add`, `remove`, 
+`clear`) and the source List instance.
+
+```coffeescript
+Hash( test:yes ).onChange (keys, hash)->
+  console.log "Hash changed", keys
+```
+
+For Hashes, the callback receives the keys that were changed (always an Array) 
+and the source Hash instance.
+
+All change events propagate upward.
+
+```coffeescript
+page= Hash( current:'home', params:null )
+
+app= Hash( {page} )
+
+app.onChange (keys, hash)->
+  console.log "Something changed!"
+
+page.set current:'about'
+
+# app.onChange handler is called!
+```
+
+The `Store` type is for syncing objects to `localStorage` (or `sessionStorage`).
+
+
+```coffeescript
+store= Store('app.settings')
+settings= Hash( store.load(
+  font: 'Helvetica' # Default values are returned if no data was found in storage
+))
+
+settings.onChange( store.save )
+
+settings.set font:'Comic Sans' # Ack! But automatically persisted
+```
+
+You can nest objects and selectively store at certain levels, if you want:
+
+```coffeescript
+class App
+  constructor: ->
+    store= Store( 'app.settings' )
+    @state= Hash(
+      page: Hash( current:'home', params:null )
+      settings: Hash(store.load( font:'Helvetica' ))
+      other: 'Whatever'
+    )
+    @state.get('settings').onChange(store.save)
+
+app= new App
+```
+
+Only `app.state.settings` will be persisted in the `app.state` graph.
 
 I use this with small React projects:
 
@@ -39,3 +102,7 @@ state.onChange ->
 @onload= ->
   state.set loaded:yes
 ```
+
+Oh yes, calling `get()` with no parameters will return a JSON-like structure,
+very useful for splatting into React props as shown above.
+
