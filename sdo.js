@@ -283,6 +283,20 @@
       return this;
     };
 
+    List.prototype.insert = function(value, _silent) {
+      this._list.unshift(value);
+      if (value != null) {
+        if (typeof value.onChange === "function") {
+          value.onChange(this._notifyChange);
+        }
+      }
+      this.length = this._list.length;
+      if (!_silent) {
+        this._notifyChange('add');
+      }
+      return this;
+    };
+
     List.prototype.remove = function(index, _silent) {
       var value;
       value = this.get(index);

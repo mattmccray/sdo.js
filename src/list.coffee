@@ -23,7 +23,16 @@ class List extends OnChange
     for value in values
       @add value, _silent
     this
+
+  insert: (value, _silent)->
+    @_list.unshift value
+    value?.onChange?(@_notifyChange)
+    @length= @_list.length
+    @_notifyChange('add') unless _silent
+    this
   
+  # Todo: insertAt
+
   remove: (index, _silent)->
     value= @get(index)
     @_list.splice(index, 1)
@@ -37,6 +46,8 @@ class List extends OnChange
       (val?.get?() or val for val in @_list)
     else
      @_list[index]
+
+  # Todo: indexOf
 
   items: -> 
     @_list
