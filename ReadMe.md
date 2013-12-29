@@ -106,3 +106,4 @@ state.onChange ->
 Oh yes, calling `get()` with no parameters will return a JSON-like structure,
 very useful for splatting into React props as shown above.
 
+[Run unit tests in your browser...](http://darthapo.github.io/sdo.js/test/)
