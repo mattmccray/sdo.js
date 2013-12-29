@@ -33,24 +33,6 @@ expose= do ->
       throw new Error "#{key} already exists!" if key in _root
       _root[key]= value
 
-# defaults= (obj)->
-#   for source in _slice.call(arguments, 1)
-#     if source
-#       for key,value of source
-#         unless obj[key]?
-#           obj[key]= value
-#   obj
-
-# extend= (obj)->
-#   for source in _slice.call(arguments, 1)
-#     if source
-#       for key,value of source
-#         obj[key]= value
-#   obj
-
-# clone= (obj)->
-#   extend {}, obj
-
 
 class OnChange
   # If fn is null and remove is true, it'll clear all listeners.

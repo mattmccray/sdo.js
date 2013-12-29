@@ -1,6 +1,5 @@
 
-class Store
-  
+class Store  
   stores= {} # Cache so that multiple calls to Storage('name') will return the same instance
   
   constructor: (@storageKey, @backend=window['localStorage'])->

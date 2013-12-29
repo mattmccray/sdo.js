@@ -4,7 +4,11 @@ class Hash extends OnChange
     return new Hash(source, callback) if this is _global
     super
     @_atts= {}
-    @set(source) if source
+    if source
+      if source instanceof Hash
+        @set(source._atts)
+      else if type(source) is 'object'
+        @set(source)
     @onChange(callback) if callback
   
   set: (key, value, _silent)->
@@ -57,4 +61,3 @@ class Hash extends OnChange
 expose {
   Hash
 }
-# ((root)-> root.Hash = Hash)(module?.exports or this)

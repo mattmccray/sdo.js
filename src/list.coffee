@@ -2,13 +2,17 @@
 class List extends OnChange
   constructor: (source, callback)->
     return new List(source, callback) if this is _global
+    super
     @_list= []
     @length= 0
-    @addAll(source) if source
+    if source
+      if type(source) is 'array'
+        @addAll(source)
+      else
+        @add(source)
     @onChange(callback) if callback
 
   add: (value, _silent)->
-    # unless value in _list
     @_list.push value
     value?.onChange?(@_notifyChange)
     @length= @_list.length
@@ -22,7 +26,6 @@ class List extends OnChange
   
   remove: (index, _silent)->
     value= @get(index)
-    # @_list= (val for val,i in @_list when i isnt index)
     @_list.splice(index, 1)
     value?.onChange? @_notifyChange, true
     @length= @_list.length
@@ -47,4 +50,3 @@ class List extends OnChange
 expose {
   List
 }
-

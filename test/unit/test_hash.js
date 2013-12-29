@@ -104,9 +104,9 @@ describe('Hash', function(){
   })
 
 
-  xit('should merge hashes/lists on set', function() {
+  // xit('should merge child hashes/lists on set', function() {
     
-  })
+  // })
 
   it('should propagate change events from nested hashes', function() {
     var count= 0,
