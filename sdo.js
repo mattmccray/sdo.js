@@ -134,7 +134,11 @@
       Hash.__super__.constructor.apply(this, arguments);
       this._atts = {};
       if (source) {
-        this.set(source);
+        if (source instanceof Hash) {
+          this.set(source._atts);
+        } else if (type(source) === 'object') {
+          this.set(source);
+        }
       }
       if (callback) {
         this.onChange(callback);
@@ -241,10 +245,15 @@
       if (this === _global) {
         return new List(source, callback);
       }
+      List.__super__.constructor.apply(this, arguments);
       this._list = [];
       this.length = 0;
       if (source) {
-        this.addAll(source);
+        if (type(source) === 'array') {
+          this.addAll(source);
+        } else {
+          this.add(source);
+        }
       }
       if (callback) {
         this.onChange(callback);

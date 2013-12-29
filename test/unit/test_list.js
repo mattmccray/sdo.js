@@ -30,6 +30,78 @@ describe('List', function(){
     
   })
 
+  it('should fire onChange handlers', function() {
+    var l= List(['first']),
+        count= 0
+    
+    l.onChange(function(action, list){
+      count += 1
+      expect( action ).to.exist
+      expect( action ).to.be.a.String
+
+      expect( list ).to.exist
+      expect( list ).to.equal(l)
+    })
+
+    l.add('new')
+    expect( count ).to.equal(1)
+    expect( l.length ).to.equal(2)
+
+    l.remove( 0 )
+    expect( count ).to.equal(2)
+    expect( l.length ).to.equal(1)
+  })
+
+it('should propagate change events from nested hashes', function() {
+    var count= 0,
+        child= Hash({ 
+          name:'Kid' 
+        }),
+        parent= List([
+          'first',
+          child
+        ])
+    parent.onChange(function() {
+      count += 1
+    })
+
+    parent.add('new')
+    expect( count ).to.equal(1)
+
+    child.set('name', 'Terror')
+    expect( count ).to.equal(2)
+    
+  })
+
+  it('should propagate change events from nested lists', function() {
+    var count= 0,
+        favs= List(['chocolate']),
+        items= List([
+          favs
+        ]),
+        deepCount= 0,
+        deeplynested= List([
+          Hash({
+            sub: List(favs)
+          })
+        ])
+    
+    items.onChange(function() {
+      // console.log("onChange", arguments)
+      count += 1
+    })
+    deeplynested.onChange(function() {
+      deepCount += 1 
+    })
+
+    items.add('item')
+    expect( count ).to.equal(1)
+
+    favs.add('fast cars')
+    expect( count ).to.equal(2)
+    expect( deepCount ).to.equal(1)
+  })
+
 })
 
 
